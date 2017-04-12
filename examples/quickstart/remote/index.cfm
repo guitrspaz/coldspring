@@ -13,7 +13,7 @@
 
 <!--- Invoke the web service. --->
 <cfinvoke
-	webservice="http://#CGI.SERVER_NAME#:#CGI.SERVER_PORT##CGI.CONTEXT_PATH#/examples/quickstart/remote/RemoteLanguageService.cfc?wsdl"
+	webservice="/examples/quickstart/remote/RemoteLanguageService.cfc?wsdl"
 	method="reverseString"
 	returnvariable="wsReturnValue">
 

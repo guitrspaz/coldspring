@@ -1,3 +1,4 @@
+<cftry>
 <cfimport taglib="../layout" prefix="layout" />
 
 <cfoutput>
@@ -17,3 +18,7 @@
 
 </layout:layout>
 </cfoutput>
+	<cfcatch>
+		<cfdump var="#cfcatch#" />
+	</cfcatch>
+</cftry>

@@ -63,7 +63,7 @@
 <cffunction name="testSimpleReturnString" hint="test just returning a string" access="public" returntype="void" output="false">
 	<cfscript>
 		var local = {};
-		local.path = "http://#CGI.SERVER_NAME#:#CGI.SERVER_PORT##CGI.CONTEXT_PATH#/unittests/HelloProxy.cfc?method=sayHello&returnFormat=json";
+		local.path = "/unittests/HelloProxy.cfc?method=sayHello&returnFormat=json";
     </cfscript>
     <cfhttp url="#local.path#" method="get" result="local.result">
 
@@ -76,7 +76,7 @@
 <cffunction name="testAddOnMissingMethod" hint="test adding onMissingMethod" access="public" returntype="void" output="false">
 	<cfscript>
 		var local = {};
-		local.path = "http://#CGI.SERVER_NAME#:#CGI.SERVER_PORT##CGI.CONTEXT_PATH#/unittests/HelloProxyOnMM.cfc?method=doThis&returnFormat=json";
+		local.path = "/unittests/HelloProxyOnMM.cfc?method=doThis&returnFormat=json";
     </cfscript>
     <cfhttp url="#local.path#" method="get" result="local.result">
 
@@ -86,7 +86,7 @@
     </cfscript>
 
 	<cfscript>
-		local.path = "http://#CGI.SERVER_NAME#:#CGI.SERVER_PORT##CGI.CONTEXT_PATH#/unittests/HelloProxyOnMM.cfc?method=doThat&returnFormat=json";
+		local.path = "/unittests/HelloProxyOnMM.cfc?method=doThat&returnFormat=json";
     </cfscript>
     <cfhttp url="#local.path#" method="get" result="local.result">
 
@@ -99,7 +99,7 @@
 <cffunction name="testAddingInterceptors" hint="test applying interceptors" access="public" returntype="void" output="false">
 	<cfscript>
 		var local = {};
-		local.path = "http://#CGI.SERVER_NAME#:#CGI.SERVER_PORT##CGI.CONTEXT_PATH#/unittests/HelloProxyOnMMAOP.cfc?method=doThis&returnFormat=json";
+		local.path = "/unittests/HelloProxyOnMMAOP.cfc?method=doThis&returnFormat=json";
     </cfscript>
     <cfhttp url="#local.path#" method="get" result="local.result">
 
@@ -109,7 +109,7 @@
     </cfscript>
 
 	<cfscript>
-		local.path = "http://#CGI.SERVER_NAME#:#CGI.SERVER_PORT##CGI.CONTEXT_PATH#/unittests/HelloProxyOnMMAOP.cfc?method=doThat&returnFormat=json";
+		local.path = "/unittests/HelloProxyOnMMAOP.cfc?method=doThat&returnFormat=json";
     </cfscript>
     <cfhttp url="#local.path#" method="get" result="local.result">
 
@@ -120,7 +120,7 @@
 
 	<cfscript>
 		println("Saying Hello!");
-		local.path = "http://#CGI.SERVER_NAME#:#CGI.SERVER_PORT##CGI.CONTEXT_PATH#/unittests/HelloProxyOnMMAOP.cfc?method=sayHello&returnFormat=json";
+		local.path = "/unittests/HelloProxyOnMMAOP.cfc?method=sayHello&returnFormat=json";
     </cfscript>
     <cfhttp url="#local.path#" method="get" result="local.result">
 
@@ -131,7 +131,7 @@
 
 	<cfscript>
 		str = "FooBar!";
-		local.path = "http://#CGI.SERVER_NAME#:#CGI.SERVER_PORT##CGI.CONTEXT_PATH#/unittests/HelloProxyOnMMAOP.cfc?method=sayHello&str=#urlEncodedFormat(str)#&returnFormat=json";
+		local.path = "/unittests/HelloProxyOnMMAOP.cfc?method=sayHello&str=#urlEncodedFormat(str)#&returnFormat=json";
     </cfscript>
     <cfhttp url="#local.path#" method="get" result="local.result">
 
