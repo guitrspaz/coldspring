@@ -650,7 +650,7 @@
 			</cfscript>
 			<cfthrow
 				type="coldspring.NoSuchBeanDefinitionException"
-				message="Bean definition not found"
+				message="Bean definition not found: #arguments.beanName#"
 				detail="#SerializeJSON(logData)#"
 				extendedInfo="#SerializeJSON(this.getBeanDefinitionList())#"
 			/>
