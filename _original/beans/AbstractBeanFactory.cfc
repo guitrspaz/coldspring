@@ -33,6 +33,9 @@
 	<cfset variables.parent = 0>
 	<!--- bean cache --->
 	<cfset variables.singletonCache = StructNew() />
+	<!--- monolith logger --->
+	<cfset variables.monolithLogger=new coldspring.monolith.MonolithLogger() />
+
 	<cfset variables.aliasMap = StructNew() />
 	<cfset variables.known_bf_postprocessors = "coldspring.beans.factory.config.PropertyPlaceholderConfigurer,coldspring.beans.factory.config.BeanFactoryLocator" />
 	<cfset variables.known_bean_postprocessors = "coldspring.aop.framework.autoproxy.BeanNameAutoProxyCreator" />
@@ -43,7 +46,11 @@
 
 
 	<cffunction name="init" access="private" returntype="void" output="false">
-		<cfthrow message="Abstract CFC cannot be initialized" />
+		<cfset getMonolithLogger().ThrowError(type="Abstract CFC cannot be initialized") />
+	</cffunction>
+
+	<cffunction name="getMonolithLogger" access="public" returnType="void" output="false">
+		<cfreturn variables.monolithLogger />
 	</cffunction>
 
 	<cffunction name="getParent" access="public" returntype="coldspring.beans.AbstractBeanFactory" output="false">
@@ -61,22 +68,22 @@
 
 	<cffunction name="getBean" access="public" returntype="any" output="false">
 		<cfargument name="beanName" type="string" required="true" />
-		<cfthrow type="Method.NotImplemented">
+		<cfset getMonolithLogger().ThrowError(type="Method.NotImplemented") />
 	</cffunction>
 
 	<cffunction name="containsBean" access="public" returntype="boolean" output="false">
 		<cfargument name="beanName" type="string" required="true" />
-		<cfthrow type="Method.NotImplemented">
+		<cfset getMonolithLogger().ThrowError(type="Method.NotImplemented") />
 	</cffunction>
 
 	<cffunction name="getType" access="public" returntype="string" output="false">
 		<cfargument name="beanName" type="string" required="true" />
-		<cfthrow type="Method.NotImplemented">
+		<cfset getMonolithLogger().ThrowError(type="Method.NotImplemented") />
 	</cffunction>
 
 	<cffunction name="isSingleton" access="public" returntype="boolean" output="false">
 		<cfargument name="beanName" type="string" required="true" />
-		<cfthrow type="Method.NotImplemented">
+		<cfset getMonolithLogger().ThrowError(type="Method.NotImplemented") />
 	</cffunction>
 
 	<!--- begining with ColdSpring 1.5, we will use the abstract bean factory for all base implementations
@@ -109,7 +116,7 @@
 			<cfif isObject(variables.parent)>
 				<cfset objRef = variables.parent.getBeanFromSingletonCache(arguments.beanName)>
 			<cfelse>
-				<cfthrow message="Cache error, #beanName# does not exists">
+				<cfset getMonolithLogger().ThrowError(message="Cache error, #beanName# does not exist",type="Bean.DoesNotExist") />
 			</cfif>
 		</cfif>
 
@@ -130,7 +137,7 @@
 		</cflock>
 
 		<cfif error>
-			<cfthrow message="Cache error, #beanName# already exists in cache">
+			<cfset getMonolithLogger().ThrowError(message="Cache error, #beanName# already exists in cache",type="Bean.AlreadyExistsInCache") />
 		</cfif>
 	</cffunction>
 
@@ -148,12 +155,12 @@
 						return isSimpleValue(value);
 					});
 				</cfscript>
-				<cfthrow
-					type="coldspring.MissingBeanReference"
+				<cfset getMonolithLogger().ThrowError(
+					type="Bean.MissingBeanReference"
 					message="There is no bean registered with the factory with the id #arguments.beanName#"
-					detail="#SerializeJSON(logArgs)#"
-					extendedInfo="#SerializeJSON(this.getBeanDefinitionList())#"
-				/>
+					detail="#logArgs#"
+					extendedInfo="#this.getBeanDefinitionList()#"
+				) />
 			</cfif>
 		<cfelse>
 			<cfreturn variables.beanDefs[resolvedName] />
@@ -195,6 +202,11 @@
 		</cflock>
 
 		<cfif len(duplicateAlias)>
+			<cfset getMonolithLogger().ThrowError(
+				type="Bean.DuplicateAlias"
+				message="The alias #arguments.alias# is already registered for bean #duplicateAlias#"
+				detail="#arguments#"
+			) />
 			<cfthrow type="ColdSpring.AliasException"
 					 detail="The alias #arguments.alias# is already registered for bean #duplicateAlias#"/>
 		</cfif>

@@ -65,13 +65,26 @@
 			</cfif>
 
 			<cfif not fileExists(arguments.importedFilename)>
-				<cfthrow message="The file #arguments.importedFilename# does not exist!"
-						detail="You have tried to use or include a file (#arguments.importedFilename#) that does not exist using either absolute, relative, or mapped paths." />
+				<cfset getMonolithLogger().ThrowError(
+					type="Factory.MissingFile"
+					message="The file #arguments.importedFilename# does not exist!"
+					detail="You have tried to use or include a file (#arguments.importedFilename#) that does not exist using either absolute, relative, or mapped paths."
+					extendedInfo={arguments:arguments,beanDefs:this.getBeanDefinitionList()}
+				) />
 			</cfif>
 
 			<cffile action="read" file="#arguments.importedFilename#" variable="fileContent" />
-
-			<cfset xml = xmlParse(fileContent)>
+			<cftry>
+				<cfset xml = xmlParse(fileContent)>
+				<cfcatch>
+					<cfset getMonolithLogger().ThrowError(
+						type="Factory.InvalidXML"
+						message="There was an error parsing #arguments.importedFilename#"
+						detail="#fileContent#"
+						extendedInfo={arguments:arguments,cfcatch:cfcatch,beanDefs:this.getBeanDefinitionList()}
+					) />
+				</cfcatch>
+			</cftry>
 			<cfset imports = xmlSearch(xml,"/beans/import")>
 
 			<cfset structInsert(arguments.importFiles,arguments.importedFilename,xml,false)>
@@ -114,8 +127,12 @@
 				</cfif>
 
 				<cfif not fileExists(resource)>
-					<cfthrow message="The file #resource# does not exist!"
-							detail="You have tried to use or include a file (#resource#) that does not exist using either absolute, relative, or mapped paths." />
+					<cfset getMonolithLogger().ThrowError(
+						type="Factory.MissingResource"
+						message="The file #resource# does not exist!"
+						detail="You have tried to use or include a file (#resource#) that does not exist using either absolute, relative, or mapped paths."
+						extendedInfo={importFiles:arguments.importFiles,imports:imports,beanDefs:this.getBeanDefinitionList()}
+					) />
 				</cfif>
 
 				<cfset findImports(arguments.importFiles,resource)>
@@ -147,8 +164,12 @@
 			</cfif>
 		</cfloop>
 		<cfif arrayLen(hits) GT depth>
-			<cfthrow message="The relative path specified is requesting more levels than are available in the directory structure."
-					detail="You are trying to use a relative path containing #arrayLen(hits)# levels of nested directories but there are only #depth# levels available." />
+			<cfset getMonolithLogger().ThrowError(
+				type="Factory.TooManyLevels"
+				message="The relative path specified is requesting more levels than are available in the directory structure."
+				detail="You are trying to use a relative path containing #arrayLen(hits)# levels of nested directories but there are only #depth# levels available."
+				extendedInfo={fullPath:fullPath,beanDefs:this.getBeanDefinitionList()}
+			) />
 		</cfif>
 		<cfloop from="1" to="#arrayLen(hits)#" index="h">
 			<cfset arrayDeleteAt(newPath,hits[h]-offset)>
@@ -165,8 +186,12 @@
 		</cfif>
 
 		<cfif not directoryExists(getDirectoryFrompath(retVal))>
-			<cfthrow message="You have specified an invalid directory"
-					detail="The directory path specified, #getDirectoryFromPath(retVal)# does not exist." />
+			<cfset getMonolithLogger().ThrowError(
+				type="Factory.InvalidDirectory"
+				message="You have specified an invalid directory"
+				detail="The directory path specified, #getDirectoryFromPath(retVal)# does not exist."
+				extendedInfo={calculatedPath:getDirectoryFrompath(retVal),rawPath:retVal,beanDefs:this.getBeanDefinitionList()}
+			) />
 		</cfif>
 
 		<cfreturn retVal />
@@ -290,8 +315,12 @@
 							)
 						)
 					)>
-					<cfthrow type="coldspring.MalformedBeanException"
-						message="Bean ID '#beanAttributes.id#': Xml bean definitions must contain 'id' and 'class' attributes!">
+					<cfset getMonolithLogger().ThrowError(
+						type="Bean.MalformedBeanException"
+						message="Bean ID '#beanAttributes.id#': Xml bean definitions must contain 'id' and 'class' attributes!"
+						detail="You are trying to use a relative path containing #arrayLen(hits)# levels of nested directories but there are only #depth# levels available."
+						extendedInfo={beanAttributes:beanAttributes,beanChildren:beanChildren,beanDefs:this.getBeanDefinitionList()}
+					) />
 				</cfif>
 
 				<!--- set the class (it will be blank if we are using parent) --->
@@ -432,8 +461,11 @@
 				<cfset aliasAttributes = aliases[aliasIx].XmlAttributes />
 
 				<cfif not (StructKeyExists(aliasAttributes,'name') and StructKeyExists(aliasAttributes,'alias'))>
-					<cfthrow type="coldspring.MalformedAliasException"
-						message="Xml alias definitions must contain 'name' and 'alias' attributes!">
+					<cfset getMonolithLogger().ThrowError(
+						type="Bean.MalformedAliasException"
+						message="Xml alias definitions must contain 'name' and 'alias' attributes!"
+						extendedInfo={aliasAttributes:aliasAttributes,beanDefs:this.getBeanDefinitionList()}
+					) />
 				</cfif>
 
 				<cfset registerAlias(aliasAttributes.name, aliasAttributes.alias)>
@@ -597,7 +629,11 @@
 		<cfelseif isObject(variables.parent) AND variables.parent.localFactoryContainsBean(arguments.beanName)>
 			<cfreturn variables.parent.isSingleton(arguments.beanName)>
 		<cfelse>
-			<cfthrow type="coldspring.NoSuchBeanDefinitionException" detail="Bean definition for bean named: #arguments.beanName# could not be found."/>
+			<cfset getMonolithLogger().ThrowError(
+				type="Bean.NoSuchBeanDefinitionException"
+				message="Bean definition for bean named: #arguments.beanName# could not be found."
+				extendedInfo={beanName:arguments.beanName,beanDefs:this.getBeanDefinitionList()}
+			) />
 		</cfif>
 	</cffunction>
 
@@ -620,8 +656,11 @@
 				  checking the cache first) all instances of variables.beanDefs[resolvedName] changed to beanDef --->
 			<cfset beanDef = getMergedBeanDefinition(resolvedName)/>
 			<cfif beanDef.isAbstract()>
-				<cfthrow type="coldspring.BeanCreationException"
-						 detail="Abstract Beans cannot be instanciated. Did you really meen to define: #resolvedName# as 'Abstract'?"/>
+				<cfset getMonolithLogger().ThrowError(
+					type="Bean.BeanCreationException"
+					message="Abstract Beans cannot be instanciated. Did you really meen to define: #resolvedName# as 'Abstract'?"
+					extendedInfo={resolvedName:resolvedName,beanName:arguments.beanName,beanDefs:this.getBeanDefinitionList()}
+				) />
 			</cfif>
 
 			<!--- moving the lock out so a second thread will wait for a constructed bean --->
@@ -648,12 +687,12 @@
 					return isSimpleValue(value);
 				});
 			</cfscript>
-			<cfthrow
-				type="coldspring.NoSuchBeanDefinitionException"
+			<cfset getMonolithLogger().ThrowError(
+				type="Factory.NoSuchBeanDefinitionException"
 				message="Bean definition not found: #arguments.beanName#"
 				detail="#SerializeJSON(logData)#"
 				extendedInfo="#SerializeJSON(this.getBeanDefinitionList())#"
-			/>
+			) />
 		</cfif>
 
 	</cffunction>
@@ -670,7 +709,14 @@
 				<cfset bean = getBean(beanName) />
 				<cftry>
 					<cfset bean.setBeanID(bean) />
-					<cfcatch></cfcatch>
+					<cfcatch>
+						<cfset getMonolithLogger().ThrowError(
+							type="Factory.BeanNotFound"
+							message="Bean definition not found: #beanName#"
+							extendedInfo={cfcatch:cfcatch,beanDefs:this.getBeanDefinitionList()}
+							throwOnError=false
+						) />
+					</cfcatch>
 				</cftry>
 				<cfset bean.postProcessBeanFactory(this) />
 			</cfif>
@@ -757,8 +803,11 @@
 					their constructor args may be dependencies, so we will create them in the NEXT loop, along with
 					init methods --->
 				<cfif beanDef.isAbstract()>
-					<cfthrow type="coldspring.BeanCreationException"
-							 detail="Abstract Beans cannot be instanciated. Did you really meen to define: #beanDef.getBeanID()# as 'Abstract'?"/>
+					<cfset getMonolithLogger().ThrowError(
+						type="Factory.BeanCreationException"
+						message="Abstract Beans cannot be instanciated. Did you really meen to define: #beanDef.getBeanID()# as 'Abstract'?"
+						extendedInfo={arguments:arguments,beanDefs:this.getBeanDefinitionList()}
+					) />
 				</cfif>
 
 				<!--- there are only two places where we check then create objects in the singletone cache, we need to
@@ -811,8 +860,11 @@
 						<cfset factoryBeanDef = getMergedBeanDefinition(beanDef.getFactoryBean()) />
 
 						<cfif factoryBeanDef.isAbstract()>
-							<cfthrow type="coldspring.BeanCreationException"
-									 detail="Abstract Beans cannot be instanciated. Did you really meen to define: #beanDef.getBeanID()# as 'Abstract'?"/>
+							<cfset getMonolithLogger().ThrowError(
+								type="Factory.BeanCreationException"
+								message="Abstract Beans cannot be instanciated. Did you really meen to define: #beanDef.getBeanID()# as 'Abstract'?"
+								extendedInfo={arguments:arguments,beanDefs:this.getBeanDefinitionList()}
+							) />
 						</cfif>
 
 						<cfif factoryBeanDef.isSingleton()>
@@ -852,9 +904,12 @@
 								</cfloop>
 							</cfinvoke>
 							<cfcatch type="any">
-								<cfthrow type="coldspring.beanCreationException"
+								<cfset getMonolithLogger().ThrowError(
+									type="Factory.BeanCreationException"
 									message="Bean creation exception during factory-method call (trying to call #beanDef.getFactoryMethod()# on #factoryBeanDef.getBeanClass()#)"
-									detail="#cfcatch.message#:#cfcatch.detail#">
+									detail="#cfcatch.message#:#cfcatch.detail#"
+									extendedInfo={arguments:arguments,cfcatch:cfcatch,beanDefs:this.getBeanDefinitionList()}
+								) />
 							</cfcatch>
 						</cftry>
 						<cftry>
@@ -865,11 +920,12 @@
 								<cfset localBeanCache[beanDef.getBeanID()] = beanInstance />
 							</cfif>
 							<cfcatch type="any">
-								<cfthrow type="coldspring.beanInstanceException"
+								<cfset getMonolithLogger().ThrowError(
+									type="Factory.beanInstanceException"
 									message="Bean instance exception during factory-method call (trying to call #beanDef.getFactoryMethod()# on #factoryBeanDef.getBeanClass()#)"
 									detail="#cfcatch.message#:#cfcatch.detail#"
-									extendedInfo="#SerializeJSON({arguments:arguments,cfcatch:cfcatch})#"
-								/>
+									extendedInfo={arguments:arguments,cfcatch:cfcatch,beanDefs:this.getBeanDefinitionList()}
+								) />
 							</cfcatch>
 						</cftry>
 						<!--- make sure the beanInstance is an object if we are gonna look at it
@@ -907,9 +963,12 @@
 								</cfinvoke>
 
 								<cfcatch type="any">
-									<cfthrow type="coldspring.beanCreationException"
-										message="Bean creation exception during init() of #beanDef.getBeanClass()#"
-										detail="#cfcatch.message#:#cfcatch.detail#">
+									<cfset getMonolithLogger().ThrowError(
+										type="Factory.beanCreationException"
+										message="Bean creation exception during init() of #beanDef.getBeanClass()# (trying to call #beanDef.init()# on #factoryBeanDef.getBeanClass()#)"
+										detail="#cfcatch.message#:#cfcatch.detail#"
+										extendedInfo={arguments:arguments,cfcatch:cfcatch,beanDefs:this.getBeanDefinitionList()}
+									) />
 								</cfcatch>
 							</cftry>
 
