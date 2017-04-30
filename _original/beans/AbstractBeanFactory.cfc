@@ -49,7 +49,7 @@
 		<cfset getMonolithLogger().ThrowError(type="Abstract CFC cannot be initialized") />
 	</cffunction>
 
-	<cffunction name="getMonolithLogger" access="public" returnType="void" output="false">
+	<cffunction name="getMonolithLogger" access="public" returnType="coldspring.monolith.MonolithLogger" output="false">
 		<cfreturn variables.monolithLogger />
 	</cffunction>
 

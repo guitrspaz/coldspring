@@ -40,6 +40,10 @@
 		<cfreturn this />
 	</cffunction>
 
+	<cffunction name="getMonolithLogger" access="public" returnType="coldspring.monolith.MonolithLogger" output="false">
+		<cfreturn variables.monolithLogger />
+	</cffunction>
+
 	<cffunction name="resolvePropertyPlaceholders" access="public" returntype="void" output="false">
 		<cfargument name="properties" type="struct" required="true" hint="properties struct, passed in by a postProcessor" />
 		<cfset parsePropertyDefinition(variables.propertyDefinition, arguments.properties) />
