@@ -31,9 +31,9 @@ component
 		if( arguments.throwOnError ){
 			throw(
 				message=arguments.message,
-				detail=( isSimpleValue(arguments.detail) )?Trim(arguments.detail):SerializeJSON(arguments.detail),
-				extendedInfo=( isSimpleValue(arguments.extendedInfo) )?Trim(arguments.extendedInfo):SerializeJSON(arguments.extendedInfo),
-				type=( structKeyExists(arguments.type) )?arguments.type:'unknown'
+				detail=( structKeyExists( arguments,'detail' ) && isSimpleValue(arguments.detail) )?Trim(arguments.detail):( structKeyExists( arguments,'detail' ) && !isSimpleValue(arguments.detail) )?SerializeJSON(arguments.detail):'',
+				extendedInfo=( StructKeyExists(arguments,'detail') && isSimpleValue(arguments.extendedInfo) )?Trim(arguments.extendedInfo):( StructKeyExists(arguments,'detail') && !isSimpleValue(arguments.extendedInfo) )?SerializeJSON(arguments.extendedInfo):'',
+				type=( structKeyExists(arguments,'type') )?arguments.type:'unknown'
 			);
 		}
 	}
@@ -79,7 +79,7 @@ component
 		String type
 	){
 		//create text message
-		var errorLog=( StructKeyExists(arguments.logName) && Len(Trim(arguments.logName)) )?Trim(arguments.logName):this.getcoldspringLog();
+		var errorLog=( StructKeyExists(arguments,'logName') && Len(Trim(arguments.logName)) )?Trim(arguments.logName):this.getcoldspringLog();
 		var logString={
 			datestamp:DateTimeFormat(Now(),'full'),
 			stackTrace:getStackTrace(),
