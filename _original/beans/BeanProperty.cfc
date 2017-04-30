@@ -57,8 +57,8 @@
 		<cfif not (StructKeyExists(propertyDef,'XmlChildren')
 			  	and ArrayLen(arguments.propertyDef.XmlChildren))>
 			<cfset getMonolithLogger().ThrowError(
-				type="BeanProperty.MalformedPropertyException"
-				message="Xml properties must contain a 'name' and a child element!"
+				type="BeanProperty.MalformedPropertyException",
+				message="Xml properties must contain a 'name' and a child element!",
 				extendedInfo={arguments:arguments}
 			) />
 		</cfif>
@@ -74,8 +74,8 @@
 			<cfset child = arguments.propertyDef.XmlChildren[1] />
 			<cfcatch>
 				<cfset getMonolithLogger().ThrowError(
-					type="BeanProperty.MalformedPropertyException"
-					message="properties/constructor-args must contain a child element!"
+					type="BeanProperty.MalformedPropertyException",
+					message="properties/constructor-args must contain a child element!",
 					extendedInfo={arguments:arguments,cfcatch:cfcatch}
 				) />
 			</cfcatch>
@@ -177,8 +177,8 @@
 					<cfreturn arguments.properties[propertyPlaceholder] />
 				<cfelse>
 					<cfset getMonolithLogger().ThrowError(
-						type="BeanProperty.PlaceholderTypeError"
-						message="The supplied value for property placeholder #propertyPlaceholder# is not a simple type. This error occured while processing a beanFactoryPostProcessor!"
+						type="BeanProperty.PlaceholderTypeError",
+						message="The supplied value for property placeholder #propertyPlaceholder# is not a simple type. This error occured while processing a beanFactoryPostProcessor!",
 						extendedInfo={arguments:arguments,placeHolder:{name:propertyPlaceholder,value:arguments.properties[propertyPlaceholder]}}
 					) />
 				</cfif>
@@ -194,8 +194,8 @@
 					<cfreturn beanFactoryDefaultProperties[propertyPlaceholder] />
 				<cfelse>
 					<cfset getMonolithLogger().ThrowError(
-						type="BeanProperty.PlaceholderTypeError"
-						message="The supplied value for property placeholder #propertyPlaceholder# is not a simple type. This error occured while while resolving properties with the default bean factory properties!"
+						type="BeanProperty.PlaceholderTypeError",
+						message="The supplied value for property placeholder #propertyPlaceholder# is not a simple type. This error occured while while resolving properties with the default bean factory properties!",
 						extendedInfo={arguments:arguments,placeHolder:{name:propertyPlaceholder,value:arguments.properties[propertyPlaceholder]}}
 					) />
 				</cfif>
@@ -237,8 +237,8 @@
 					<cfreturn arguments.properties[propertyPlaceholder] />
 				<cfelse>
 					<cfset getMonolithLogger().ThrowError(
-						type="BeanProperty.PlaceholderTypeError"
-						message="The supplied value for property placeholder #propertyPlaceholder# is not of type #returnType#. This error occured while processing a beanFactoryPostProcessor!"
+						type="BeanProperty.PlaceholderTypeError",
+						message="The supplied value for property placeholder #propertyPlaceholder# is not of type #returnType#. This error occured while processing a beanFactoryPostProcessor!",
 						extendedInfo={arguments:arguments,placeHolder:{name:propertyPlaceholder,value:arguments.properties[propertyPlaceholder]}}
 					) />
 				</cfif>
@@ -248,8 +248,8 @@
 					<cfreturn beanFactoryDefaultProperties[propertyPlaceholder] />
 				<cfelse>
 					<cfset getMonolithLogger().ThrowError(
-						type="BeanProperty.PlaceholderTypeError"
-						message="The supplied value for property placeholder #propertyPlaceholder# is not of type #returnType#. This error occured while while resolving properties with the default bean factory properties!"
+						type="BeanProperty.PlaceholderTypeError",
+						message="The supplied value for property placeholder #propertyPlaceholder# is not of type #returnType#. This error occured while while resolving properties with the default bean factory properties!",
 						extendedInfo={arguments:arguments,placeHolder:{name:propertyPlaceholder,value:arguments.properties[propertyPlaceholder]}}
 					) />
 				</cfif>
@@ -263,8 +263,8 @@
 			<cfset rtn = arrayNew(1) />
 		<cfelse>
 			<cfset getMonolithLogger().ThrowError(
-				type="BeanProperty.UnsupportedPropertyChild"
-				message="Coldspring only supports map and list as complex types"
+				type="BeanProperty.UnsupportedPropertyChild",
+				message="Coldspring only supports map and list as complex types",
 				extendedInfo={arguments:arguments,returnType:returnType}
 			) />
 		</cfif>
@@ -280,15 +280,15 @@
 					 --->
 				<cfif not structkeyexists(entry.xmlAttributes,'key')>
 					<cfset getMonolithLogger().ThrowError(
-						type="BeanProperty.MalformedMapException"
-						message="Map entries must have an attribute named 'key'"
+						type="BeanProperty.MalformedMapException",
+						message="Map entries must have an attribute named 'key'",
 						extendedInfo={arguments:arguments,entry:entry}
 					) />
 				</cfif>
 				<cfif arraylen(entry.xmlChildren) neq 1>
 					<cfset getMonolithLogger().ThrowError(
-						type="BeanProperty.MalformedMapException"
-						message="Map entries must have one child"
+						type="BeanProperty.MalformedMapException",
+						message="Map entries must have one child",
 						extendedInfo={arguments:arguments,entry:entry}
 					) />
 				</cfif>
@@ -399,8 +399,8 @@
 			  		StructKeyExists(arguments.beanXml.XmlAttributes,'factory-method')
 			  	)  >
 			<cfset getMonolithLogger().ThrowError(
-				type="BeanProperty.MalformedInnerBeanException"
-				message="Xml inner bean definitions must contain a 'class' attribute or 'factory-bean'/'factory-method' attributes!"
+				type="BeanProperty.MalformedInnerBeanException",
+				message="Xml inner bean definitions must contain a 'class' attribute or 'factory-bean'/'factory-method' attributes!",
 				extendedInfo={beanXml:{attrs:arguments.beanXml.XmlAttributes,children:arguments.beanXml.XmlChildren}}
 			) />
 		</cfif>

@@ -297,8 +297,8 @@
 			<cfreturn variables.instanceData.constructorArgs[arguments.constructorArgName] />
 		<cfelse>
 			<cfset getBeanFactory().getMonolithLogger().ThrowError(
-				type="Bean.BeanDefException"
-				message="constructor-arg requested (#arguments.constructorArgName#) does not exist for bean: #getBeanID()#"
+				type="Bean.BeanDefException",
+				message="constructor-arg requested (#arguments.constructorArgName#) does not exist for bean: #getBeanID()#",
 				extendedInfo={arguments:arguments}
 			) />
 		</cfif>
@@ -328,8 +328,8 @@
 			<cfreturn variables.instanceData.properties[arguments.propertyName] />
 		<cfelse>
 			<cfset getBeanFactory().getMonolithLogger().ThrowError(
-				type="Factory.BeanDefException"
-				message="property requested (#arguments.propertyName#) does not exist for bean: #getBeanID()#"
+				type="Factory.BeanDefException",
+				message="property requested (#arguments.propertyName#) does not exist for bean: #getBeanID()#",
 				extendedInfo={arguments:arguments}
 			) />
 		</cfif>
@@ -575,9 +575,9 @@
 					<cfset additionalInfo = additionalInfo & "<br/> Snippet: " & HTMLCodeFormat(cfcatch.Snippet) />
 				</cfif>
 				<cfset getBeanFactory().getMonolithLogger().ThrowError(
-					type="Bean.BeanCreationException"
-					message="Bean creation exception in #getBeanClass()#"
-					detail="#cfcatch.message#:#cfcatch.detail#"
+					type="Bean.BeanCreationException",
+					message="Bean creation exception in #getBeanClass()#",
+					detail="#cfcatch.message#:#cfcatch.detail#",
 					extendedInfo={arguments:arguments,cfcatch:cfcatch}
 				) />
 			</cfcatch>

@@ -116,7 +116,10 @@
 			<cfif isObject(variables.parent)>
 				<cfset objRef = variables.parent.getBeanFromSingletonCache(arguments.beanName)>
 			<cfelse>
-				<cfset getMonolithLogger().ThrowError(message="Cache error, #beanName# does not exist",type="Bean.DoesNotExist") />
+				<cfset getMonolithLogger().ThrowError(
+					message="Cache error, #beanName# does not exist",
+					type="Bean.DoesNotExist"
+				) />
 			</cfif>
 		</cfif>
 
@@ -137,7 +140,10 @@
 		</cflock>
 
 		<cfif error>
-			<cfset getMonolithLogger().ThrowError(message="Cache error, #beanName# already exists in cache",type="Bean.AlreadyExistsInCache") />
+			<cfset getMonolithLogger().ThrowError(
+				message="Cache error, #beanName# already exists in cache",
+				type="Bean.AlreadyExistsInCache"
+			) />
 		</cfif>
 	</cffunction>
 
@@ -156,9 +162,9 @@
 					});
 				</cfscript>
 				<cfset getMonolithLogger().ThrowError(
-					type="Bean.MissingBeanReference"
-					message="There is no bean registered with the factory with the id #arguments.beanName#"
-					detail="#logArgs#"
+					type="Bean.MissingBeanReference",
+					message="There is no bean registered with the factory with the id #arguments.beanName#",
+					detail="#logArgs#",
 					extendedInfo="#this.getBeanDefinitionList()#"
 				) />
 			</cfif>
@@ -203,8 +209,8 @@
 
 		<cfif len(duplicateAlias)>
 			<cfset getMonolithLogger().ThrowError(
-				type="Bean.DuplicateAlias"
-				message="The alias #arguments.alias# is already registered for bean #duplicateAlias#"
+				type="Bean.DuplicateAlias",
+				message="The alias #arguments.alias# is already registered for bean #duplicateAlias#",
 				detail="#arguments#"
 			) />
 			<cfthrow type="ColdSpring.AliasException"
