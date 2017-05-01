@@ -30,7 +30,7 @@ component
 		LogError(argumentCollection=arguments);
 		if( arguments.throwOnError ){
 			throw(
-				message=arguments.message,
+				message=( structKeyExists( arguments,'message' ) )?arguments.message:'',
 				detail=( structKeyExists( arguments,'detail' ) && isSimpleValue(arguments.detail) )?Trim(arguments.detail):( structKeyExists( arguments,'detail' ) && !isSimpleValue(arguments.detail) )?SerializeJSON(arguments.detail):'',
 				extendedInfo=( StructKeyExists(arguments,'detail') && isSimpleValue(arguments.extendedInfo) )?Trim(arguments.extendedInfo):( StructKeyExists(arguments,'detail') && !isSimpleValue(arguments.extendedInfo) )?SerializeJSON(arguments.extendedInfo):'',
 				type=( structKeyExists(arguments,'type') )?arguments.type:'unknown'

@@ -710,12 +710,14 @@
 				<cftry>
 					<cfset bean.setBeanID(bean) />
 					<cfcatch>
+						<!---
 						<cfset getMonolithLogger().ThrowError(
 							type="Factory.BeanNotFound",
 							message="Bean definition not found: #beanName#",
 							extendedInfo={cfcatch:cfcatch,beanDefs:this.getBeanDefinitionList()},
 							throwOnError=false
 						) />
+						--->
 					</cfcatch>
 				</cftry>
 				<cfset bean.postProcessBeanFactory(this) />
@@ -965,7 +967,6 @@
 								<cfcatch type="any">
 									<cfset getMonolithLogger().ThrowError(
 										type="Factory.beanCreationException",
-										message="Bean creation exception during init() of #beanDef.getBeanClass()# (trying to call #beanDef.init()# on #factoryBeanDef.getBeanClass()#)",
 										detail="#cfcatch.message#:#cfcatch.detail#",
 										extendedInfo={arguments:arguments,cfcatch:cfcatch,beanDefs:this.getBeanDefinitionList()}
 									) />
