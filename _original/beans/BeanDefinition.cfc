@@ -299,7 +299,8 @@
 			<cfset getBeanFactory().getMonolithLogger().ThrowError(
 				type="Bean.BeanDefException",
 				message="constructor-arg requested (#arguments.constructorArgName#) does not exist for bean: #getBeanID()#",
-				extendedInfo={arguments:arguments}
+				extendedInfo={arguments:arguments},
+				logOnError=false
 			) />
 		</cfif>
 	</cffunction>
@@ -331,7 +332,6 @@
 				type="Factory.BeanDefException",
 				message="property requested (#arguments.propertyName#) does not exist for bean: #getBeanID()#",
 				extendedInfo={arguments:arguments},
-				throwOnError=false,
 				logOnError=false
 			) />
 		</cfif>
