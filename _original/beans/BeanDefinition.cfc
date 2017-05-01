@@ -330,7 +330,9 @@
 			<cfset getBeanFactory().getMonolithLogger().ThrowError(
 				type="Factory.BeanDefException",
 				message="property requested (#arguments.propertyName#) does not exist for bean: #getBeanID()#",
-				extendedInfo={arguments:arguments}
+				extendedInfo={arguments:arguments},
+				throwOnError=false,
+				logOnError=false
 			) />
 		</cfif>
 	</cffunction>
