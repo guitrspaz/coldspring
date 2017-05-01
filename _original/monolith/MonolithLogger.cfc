@@ -25,9 +25,12 @@ component
 		Any detail='',
 		String logType="information" hint="this directly reflects the type attribute for cflog",
 		String type,
-		Boolean throwOnError=true
+		Boolean throwOnError=true,
+		Boolean logOnError=true
 	){
-		LogError(argumentCollection=arguments);
+		if( arguments.logOnError ){
+			LogError(argumentCollection=arguments);
+		}
 		if( arguments.throwOnError ){
 			throw(
 				message=( structKeyExists( arguments,'message' ) )?arguments.message:'',
