@@ -710,14 +710,11 @@
 				<cftry>
 					<cfset bean.setBeanID(bean) />
 					<cfcatch>
-						<!---
 						<cfset getMonolithLogger().ThrowError(
 							type="Factory.BeanNotFound",
 							message="Bean definition not found: #beanName#",
-							extendedInfo={cfcatch:cfcatch,beanDefs:this.getBeanDefinitionList()},
-							throwOnError=false
+							extendedInfo={cfcatch:cfcatch,beanDefs:this.getBeanDefinitionList()}
 						) />
-						--->
 					</cfcatch>
 				</cftry>
 				<cfset bean.postProcessBeanFactory(this) />

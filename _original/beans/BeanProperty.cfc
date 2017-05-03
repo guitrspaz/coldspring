@@ -82,8 +82,7 @@
 					type="BeanProperty.MalformedPropertyException",
 					message="properties/constructor-args must contain a child element!",
 					extendedInfo={arguments:arguments,cfcatch:cfcatch},
-				logOnError=false
-
+					logOnError=false
 				) />
 			</cfcatch>
 		</cftry>
