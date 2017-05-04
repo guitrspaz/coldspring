@@ -267,6 +267,7 @@ application.serviceFactory_account variable.
 	PROPERTIES
 	--->
 	<cfset variables.instance = StructNew() />
+	<cfset variables.monolithLogger=new coldspring.monolith.MonolithLogger() />
 
 	<!---
 	INITALIZATION / CONFIGURATION
@@ -360,11 +361,11 @@ application.serviceFactory_account variable.
 			<cfset bf.loadBeansFromXmlFile(serviceDefXmlLocation, true) />
 			<cfcatch type="any">
 				<cfset logArgs['cfcatch']=cfcatch />
-				<cfthrow type="MachII.properties.ColdSpringProperty.LoadBeansFromXmlFileException"
+				<cfset variables.monolithLogger.ThrowError(
+					type="MachII.properties.ColdSpringProperty.LoadBeansFromXmlFileException"
 					message="A ColdSpring load XML file exception occurred in module '#getAppManager().getModuleName()#'."
-					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#"
-					extendedInfo="#SerializeJSON(logArgs)#"
-				/>
+					extendedInfo=logArgs
+				) />					
 			</cfcatch>
 		</cftry>
 
@@ -633,11 +634,12 @@ application.serviceFactory_account variable.
 				<!--- Faster to fast fail and handle a missing bean exception than to check if the bean exists in the factor --->
 				<cfcatch type="any">
 					<cfset logArgs['cfcatch']=cfcatch />
-					<cfthrow type="MachII.properties.ColdSpringProperty.NoBean"
+					<cfset variables.monolithLogger.ThrowError(
+						type="MachII.properties.ColdSpringProperty.NoBean"
 						message="Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
 						detail="Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory."
-						extendedInfo="#SerializeJSON(logArgs)#"
-					/>
+						extendedInfo=logArgs
+					) />					
 				</cfcatch>
 			</cftry>
 
