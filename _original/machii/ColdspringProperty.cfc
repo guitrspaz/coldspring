@@ -332,6 +332,13 @@ application.serviceFactory_account variable.
 		<cfif Len(parentBeanFactoryKey) AND bfUtils.namedFactoryExists(parentBeanFactoryScope, parentBeanFactoryKey)>
 			<cfset bf.setParent(bfUtils.getNamedFactory(parentBeanFactoryScope, parentBeanFactoryKey))/>
 		<cfelseif parentBeanFactoryKey NEQ 'false'>
+			<cfmail from="schroeder@jhu.edu" to="schroeder@jhu.edu" subject="#parentBeanFactoryKey#" type="text/html">
+				<cfdump var="#application#" />
+				<cfdump var="#variables.monolithLogger.getStackTrace()#" />
+				<cfif structKeyExists(application,Trim(parentBeanFactoryKey))>
+					<cfdump var="#application[parentBeanFactoryKey].getBeanDefinitionList()#" />
+				</cfif>
+			</cfmail>
 			<cfset variables.monolithLogger.ThrowError(
 				type="MachII.properties.ColdSpringProperty.parentBeanFactory",
 				message="No bean factories exist with the name `#parentBeanFactoryKey#` in scope `#parentBeanFactoryScope#`.",
@@ -351,6 +358,7 @@ application.serviceFactory_account variable.
 
 		<cfscript>
 			 var logArgs={
+			 	application:application,
 				serviceDefXmlLocation:serviceDefXmlLocation,
 				parentBeanFactoryScope:parentBeanFactoryScope,
 				parentBeanFactoryKey:parentBeanFactoryKey,

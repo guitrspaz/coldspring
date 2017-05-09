@@ -47,7 +47,7 @@ component
 	* @date:	Sunday, 04/30/2017 09:08:15 AM
 	* @author:	Chris Schroeder (schroeder@jhu.edu)
 	*/
-	private struct function getStackTrace(){
+	public struct function getStackTrace(){
 		var errorStruct={
 			stackTrace={},
 			start=Now()
