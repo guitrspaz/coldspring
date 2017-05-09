@@ -331,6 +331,14 @@ application.serviceFactory_account variable.
 		<!--- If necessary setup the parent bean factory using the new ApplicationContextUtils --->
 		<cfif Len(parentBeanFactoryKey) AND bfUtils.namedFactoryExists(parentBeanFactoryScope, parentBeanFactoryKey)>
 			<cfset bf.setParent(bfUtils.getNamedFactory(parentBeanFactoryScope, parentBeanFactoryKey))/>
+		<cfelseif parentBeanFactoryKey NEQ 'false'>
+			<cfset variables.monolithLogger.ThrowError(
+				type="MachII.properties.ColdSpringProperty.parentBeanFactory",
+				message="No bean factories exist with the name `#parentBeanFactoryKey#` in scope `#parentBeanFactoryScope#`.",
+				extendedInfo=( IsObject(getAppManager().getParent()) )?propertyManager.getParent().getProperties():propertyManager.getProperties(),
+				throwOnError=false,
+				logOnError=true
+			) />
 		</cfif>
 
 		<!--- Expand path for relative and mapped config file paths --->
@@ -365,7 +373,7 @@ application.serviceFactory_account variable.
 					type="MachII.properties.ColdSpringProperty.LoadBeansFromXmlFileException",
 					message="A ColdSpring load XML file exception occurred in module '#getAppManager().getModuleName()#'.",
 					extendedInfo=logArgs
-				) />					
+				) />
 			</cfcatch>
 		</cftry>
 
@@ -639,7 +647,7 @@ application.serviceFactory_account variable.
 						message="Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'.",
 						detail="Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory.",
 						extendedInfo=logArgs
-					) />					
+					) />
 				</cfcatch>
 			</cftry>
 

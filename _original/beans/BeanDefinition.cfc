@@ -48,7 +48,7 @@
 
 	<!--- whether this bean should be constructed imeediately upon the beanFactory receiving its definition
 			OR should the factory wait until someone asks for the bean: --->
-	<cfset variables.instanceData.lazyInit = true />
+	<cfset variables.instanceData.lazyInit = false />
 	<!--- list of known dependent beans (by name): --->
 	<cfset variables.instanceData.Dependencies = '' />
 	<!--- factory bean to use to get this bean --->

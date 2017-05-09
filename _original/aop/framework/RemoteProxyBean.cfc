@@ -48,7 +48,7 @@
 			displayname="${name}:RemoteProxyBean" 
 			hint="Abstract Base Class for Aop Based Remote Proxy Beans" 
 			output="false">
-			
+	<cfset variables.monolithLogger=new coldspring.monolith.MonolithLogger() />
 	<cfset variables.proxyId = CreateUUId() />
 	<cfset variables.beanFactoryName = "${factoryName}" />
 	<cfset variables.beanFactoryScope = "${scope}" />
@@ -59,6 +59,7 @@
 		<cfset var bfUtils = 0 />
 		<cfset var bf = 0 />
 		<cfset var error = false />
+		<cfset var errorContent={} />
 		<cfset var remoteFactory = "" />
 		
 		<!--- I want to make sure that the proxy id really exists --->
@@ -92,6 +93,7 @@
 					<cfset variables.adviceChains = remoteFactory.getProxyAdviceChains() />
 					<cfset variables.constructed = true />
 					<cfcatch>
+						<cfset errorContent=cfcatch />
 						<cfset error = true />
 					</cfcatch>
 				</cftry>
@@ -99,12 +101,20 @@
 		</cflock>
 		
 		<cfif error>
-			<cfthrow type="coldspring.remoting.ApplicationContextError" 
-					 message="Sorry, a ColdSpring BeanFactory named #variables.beanFactoryName# was not found in #variables.beanFactoryScope# scope. Please make sure your bean factory is properly loaded. Perhapse your main application is not running?" />
+			<cfset getMonolithLogger().ThrowError(
+				type="coldspring.remoting.ApplicationContextError",
+				message="Sorry, a ColdSpring BeanFactory named #variables.beanFactoryName# was not found in #variables.beanFactoryScope# scope. Please make sure your bean factory is properly loaded. Perhaps your main application is not running?",
+				extendedInfo={error:errorContent,application:application,beanFactory:variables.beanFactoryName,scope:variables.beanFactoryScope,constructed:variables.constructed},
+				detail={ message:(structKeyExists(errorContent,'message'))?errorContent.message:'undefined',detail:(structKeyExists(errorContent,'detail'))?errorContent.detail:'undefined' }
+			) />
 		</cfif>
 		
 	</cffunction>
 
+	<cffunction name="getMonolithLogger" access="public" returnType="coldspring.monolith.MonolithLogger" output="false">
+		<cfreturn variables.monolithLogger />
+	</cffunction>
+	
 	<cffunction name="callMethod" access="private" returntype="any">
 		<cfargument name="methodName" type="string" required="true" />
 		<cfargument name="args" type="struct" required="true" />
