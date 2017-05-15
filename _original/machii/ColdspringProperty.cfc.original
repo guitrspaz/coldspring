@@ -331,6 +331,21 @@ application.serviceFactory_account variable.
 		<!--- If necessary setup the parent bean factory using the new ApplicationContextUtils --->
 		<cfif Len(parentBeanFactoryKey) AND bfUtils.namedFactoryExists(parentBeanFactoryScope, parentBeanFactoryKey)>
 			<cfset bf.setParent(bfUtils.getNamedFactory(parentBeanFactoryScope, parentBeanFactoryKey))/>
+		<cfelseif parentBeanFactoryKey NEQ 'false'>
+			<cfmail from="schroeder@jhu.edu" to="schroeder@jhu.edu" subject="#parentBeanFactoryKey#" type="text/html">
+				<cfdump var="#application#" />
+				<cfdump var="#variables.monolithLogger.getStackTrace()#" />
+				<cfif structKeyExists(application,Trim(parentBeanFactoryKey))>
+					<cfdump var="#application[parentBeanFactoryKey].getBeanDefinitionList()#" />
+				</cfif>
+			</cfmail>
+			<cfset variables.monolithLogger.ThrowError(
+				type="MachII.properties.ColdSpringProperty.parentBeanFactory",
+				message="No bean factories exist with the name `#parentBeanFactoryKey#` in scope `#parentBeanFactoryScope#`.",
+				extendedInfo=( IsObject(getAppManager().getParent()) )?propertyManager.getParent().getProperties():propertyManager.getProperties(),
+				throwOnError=false,
+				logOnError=true
+			) />
 		</cfif>
 
 		<!--- Expand path for relative and mapped config file paths --->
@@ -341,15 +356,31 @@ application.serviceFactory_account variable.
 		<!--- Place a temporary reference of the AppManager into the request scope for the UtilityConnector --->
 		<cfset request._MachIIAppManager = getAppManager() />
 
+		<cfscript>
+			 var logArgs={
+			 	application:application,
+				serviceDefXmlLocation:serviceDefXmlLocation,
+				parentBeanFactoryScope:parentBeanFactoryScope,
+				parentBeanFactoryKey:parentBeanFactoryKey,
+				localBeanFactoryKey:localBeanFactoryKey,
+				defaultProperties:defaultProperties.filter(function(key,value){
+					return (!(isObject(value)));
+				}),
+				defaultAttributes:defaultAttributes.filter(function(key,value){
+					return (!(isObject(value)));
+				})
+			};
+		</cfscript>
+
 		<!--- Load the bean defs --->
 		<cftry>
 			<cfset bf.loadBeansFromXmlFile(serviceDefXmlLocation, true) />
 			<cfcatch type="any">
-				<cfset getMonolithLogger().ThrowError(
-					message="Cannot load '#serviceDefXmlLocation#' in module '#getAppManager().getModuleName()#'.",
+				<cfset logArgs['cfcatch']=cfcatch />
+				<cfset variables.monolithLogger.ThrowError(
 					type="MachII.properties.ColdSpringProperty.LoadBeansFromXmlFileException",
-					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#",
-					extendedInfo={serviceLocation:serviceDefXmlLocation,parent:parentBeanFactoryKey,cfcatch:cfcatch}
+					message="A ColdSpring load XML file exception occurred in module '#getAppManager().getModuleName()#'.",
+					extendedInfo=logArgs
 				) />
 			</cfcatch>
 		</cftry>
@@ -407,10 +438,6 @@ application.serviceFactory_account variable.
 
 		<!--- Deregister as onPostObjectReload callback --->
 		<cfset getAppManager().removeOnObjectReloadCallback(this) />
-	</cffunction>
-
-	<cffunction name="getMonolithLogger" access="private" returnType="coldspring.monolith.MonolithLogger" output="false">
-		<cfreturn variables.monolithLogger />
 	</cffunction>
 
 	<!---
@@ -591,7 +618,11 @@ application.serviceFactory_account variable.
 		<cfargument name="targetObj" type="any" required="true" />
 		<cfargument name="targetObjMetadata" type="any" required="true" />
 		<cfargument name="autowireAttributeName" type="string" required="true" />
-
+		<cfscript>
+			var logArgs=arguments.filter(function(key,value){
+				return (!(isObject(value)));
+			});
+		</cfscript>
 		<cfset var beanFactory = getProperty(getProperty("beanFactoryName")) />
 		<cfset var autowireBeanNames = "" />
 		<cfset var beanName = "" />
@@ -618,11 +649,12 @@ application.serviceFactory_account variable.
 				</cfloop>
 				<!--- Faster to fast fail and handle a missing bean exception than to check if the bean exists in the factor --->
 				<cfcatch type="any">
-					<cfset getMonolithLogger().ThrowError(
-						message="Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'.",
+					<cfset logArgs['cfcatch']=cfcatch />
+					<cfset variables.monolithLogger.ThrowError(
 						type="MachII.properties.ColdSpringProperty.NoBean",
+						message="Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'.",
 						detail="Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory.",
-						extendedInfo=beanFactory.getBeanDefinitionList()
+						extendedInfo=logArgs
 					) />
 				</cfcatch>
 			</cftry>
