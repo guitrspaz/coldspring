@@ -35,8 +35,7 @@ component
 			throw(
 				message=( structKeyExists( arguments,'message' ) )?arguments.message:'',
 				detail=( structKeyExists( arguments,'detail' ) && isSimpleValue(arguments.detail) )?Trim(arguments.detail):( structKeyExists( arguments,'detail' ) && !isSimpleValue(arguments.detail) )?SerializeJSON(arguments.detail):'',
-				extendedInfo=( StructKeyExists(arguments,'detail') && isSimpleValue(arguments.extendedInfo) )?Trim(arguments.extendedInfo):( StructKeyExists(arguments,'detail') && !isSimpleValue(arguments.extendedInfo) )?SerializeJSON(arguments.extendedInfo):'',
-				type=( structKeyExists(arguments,'type') && !(isNull(arguments.type)) && isValid('string',arguments.type) && Len(Trim(arguments.type)) )?arguments.type:'Coldspring.Generic.Error'
+				extendedInfo=( StructKeyExists(arguments,'detail') && isSimpleValue(arguments.extendedInfo) )?Trim(arguments.extendedInfo):( StructKeyExists(arguments,'detail') && !isSimpleValue(arguments.extendedInfo) )?SerializeJSON(arguments.extendedInfo):''
 			);
 		}
 	}
