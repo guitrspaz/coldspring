@@ -347,7 +347,6 @@ application.serviceFactory_account variable.
 			<cfcatch type="any">
 				<cfset getMonolithLogger().ThrowError(
 					message="Cannot load '#serviceDefXmlLocation#'.",
-					type="MachII.properties.ColdSpringProperty.LoadBeansFromXmlFileException",
 					extendedInfo={serviceLocation:serviceDefXmlLocation,parent:parentBeanFactoryKey,cfcatch:cfcatch}
 				) />
 			</cfcatch>
