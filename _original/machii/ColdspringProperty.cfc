@@ -346,7 +346,7 @@ application.serviceFactory_account variable.
 			<cfset bf.loadBeansFromXmlFile(serviceDefXmlLocation, true) />
 			<cfcatch type="any">
 				<cfset getMonolithLogger().ThrowError(
-					message="Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'.",
+					message="Cannot load '#serviceDefXmlLocation#' in module '#getAppManager().getModuleName()#'.",
 					type="MachII.properties.ColdSpringProperty.LoadBeansFromXmlFileException",
 					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#",
 					extendedInfo={serviceLocation:serviceDefXmlLocation,parent:parentBeanFactoryKey,cfcatch:cfcatch}

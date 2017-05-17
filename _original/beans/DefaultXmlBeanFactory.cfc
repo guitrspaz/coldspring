@@ -1069,9 +1069,17 @@
 			<!--- now call an init-method if it's defined --->
 			<cfif beanDef.hasInitMethod() and not beanDef.getInitMethodWasCalled()>
 
-				<cfinvoke component="#beanInstance#"
+				<cftry>
+					<cfinvoke component="#beanInstance#"
 						  method="#beanDef.getInitMethod()#"/>
-
+					<cfcatch>
+						<cfset getMonolithLogger().ThrowError(
+							type="BeanDef.InitMethodError",
+							message="The bean #beanDef.getBeanID()# could not be initialized!",
+							extendedInfo={cfcatch:cfcatch}
+						) />
+					</cfcatch>
+				</cftry>
 				<!--- make sure it only gets called once --->
 				<cfset beanDef.setInitMethodWasCalled(true) />
 
