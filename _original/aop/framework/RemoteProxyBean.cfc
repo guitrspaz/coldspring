@@ -1,14 +1,14 @@
 <!---
-	  
+
   Copyright (c) 2005, Chris Scott, David Ross, Kurt Wiersma, Sean Corfield
   All rights reserved.
-	
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
+
        http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,12 +41,12 @@
  Revision 1.1  2006/01/13 15:00:12  scottc
  CSP-38 - First pass at RemoteProxyBean, creating remote services for CS managed seriveces through AOP
 
-	
----> 
- 
-<cfcomponent name="${name}" 
-			displayname="${name}:RemoteProxyBean" 
-			hint="Abstract Base Class for Aop Based Remote Proxy Beans" 
+
+--->
+
+<cfcomponent name="${name}"
+			displayname="${name}:RemoteProxyBean"
+			hint="Abstract Base Class for Aop Based Remote Proxy Beans"
 			output="false">
 	<cfset variables.monolithLogger=new coldspring.monolith.MonolithLogger() />
 	<cfset variables.proxyId = CreateUUId() />
@@ -54,21 +54,21 @@
 	<cfset variables.beanFactoryScope = "${scope}" />
 	<cfset variables.constructed = false />
 	<cfset setup() />
-	
+
 	<cffunction name="setup" access="public" returntype="void">
 		<cfset var bfUtils = 0 />
 		<cfset var bf = 0 />
 		<cfset var error = false />
 		<cfset var remoteFactory = "" />
-		
+
 		<!--- I want to make sure that the proxy id really exists --->
 		<cfif not StructKeyExists(variables, "proxyId")>
 			<cfset variables.proxyId = CreateUUId() />
 		</cfif>
-		
+
 		<cflock name="RemoteProxyBean.#variables.proxyId#.Setup" type="readonly" timeout="5">
 			<cfif not StructKeyExists(variables, "constructed") or not variables.constructed>
-			
+
 				<!--- it looks like there is an issue with setting up the variables scope in a static initializer
 					  with remote methods, so we will make sure things are set up --->
 				<cfif not StructKeyExists(variables, "constructed")>
@@ -80,7 +80,7 @@
 				<cfif not len(variables.beanFactoryScope)>
 					<cfset variables.beanFactoryScope = 'application' />
 				</cfif>
-				<cftry>		
+				<cftry>
 					<cfset bfUtils = createObject("component","coldspring.beans.util.BeanFactoryUtils").init()/>
 					<cfif not len(variables.beanFactoryName)>
 						<cfset bf = bfUtils.getDefaultFactory(variables.beanFactoryScope) />
@@ -97,19 +97,12 @@
 				</cftry>
 			</cfif>
 		</cflock>
-		
+
 		<cfif error>
-			<cfmail from="schroeder@jhu.edu" to="schroeder@jhu.edu" subject="#variables.beanFactoryName#" type="text/html">
-				<cfdump var="#application#" />
-				<cfdump var="#variables.monolithLogger.getStackTrace()#" />
-				<cfif structKeyExists(application,Trim(variables.beanFactoryName))>
-					<cfdump var="#application[variables.beanFactoryName].getBeanDefinitionList()#" />
-				</cfif>
-			</cfmail>
-			<cfthrow type="coldspring.remoting.ApplicationContextError" 
+			<cfthrow type="coldspring.remoting.ApplicationContextError"
 					 message="Sorry, a ColdSpring BeanFactory named #variables.beanFactoryName# was not found in #variables.beanFactoryScope# scope. Please make sure your bean factory is properly loaded. Perhaps your main application is not running?" />
 		</cfif>
-		
+
 	</cffunction>
 
 	<cffunction name="callMethod" access="private" returntype="any">
@@ -119,12 +112,12 @@
 		<cfset var methodInvocation = 0 />
 		<cfset var rtn = 0 />
 		<cfset var method = 0 />
-		
+
 		<!--- make sure setup is called --->
 		<cfif not StructKeyExists(variables, "constructed") or not variables.constructed>
 			<cfset setup() />
 		</cfif>
-		
+
 		<!--- if an advice chain was created for this method, retrieve a methodInvocation chain from it and proceed --->
 		<cfif StructKeyExists(variables.adviceChains, arguments.methodName)>
 			<cfset method = CreateObject('component','coldspring.aop.Method').init(variables.target, arguments.methodName, arguments.args) />
@@ -134,17 +127,17 @@
 		<cfelse>
 			<!--- if there's no advice chains to execute, just call the method --->
 			<cfinvoke component="#variables.target#"
-					  method="#arguments.methodName#" 
-					  argumentcollection="#arguments.args#" 
+					  method="#arguments.methodName#"
+					  argumentcollection="#arguments.args#"
 					  returnvariable="rtn">
 			</cfinvoke>
 			<cfif isDefined('rtn')>
 				<cfreturn rtn />
 			</cfif>
 		</cfif>
-		
+
 	</cffunction>
-			
+
 	${functions}
-	
+
 </cfcomponent>
