@@ -203,7 +203,7 @@
 					<cfset getMonolithLogger().ThrowError(
 						type="BeanProperty.PlaceholderTypeError",
 						message="The supplied value for property placeholder #propertyPlaceholder# is not a simple type. This error occured while while resolving properties with the default bean factory properties!",
-						extendedInfo={arguments:arguments,placeHolder:{name:propertyPlaceholder,value:arguments.properties[propertyPlaceholder]}},
+						extendedInfo={arguments:arguments,placeHolder:propertyPlaceholder},
 						logOnError=false
 					) />
 				</cfif>
