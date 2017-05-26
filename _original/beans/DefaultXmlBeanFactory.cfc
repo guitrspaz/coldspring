@@ -1008,37 +1008,53 @@
 
 					<!--- now do dependency injection via setters --->
 					<cfloop collection="#propDefs#" item="prop">
-						<cfset propType = propDefs[prop].getType() />
-						<cfif propType eq "value">
-							<cfinvoke component="#beanInstance#"
-									  method="set#propDefs[prop].getName()#">
-								<cfinvokeargument name="#propDefs[prop].getArgumentName()#"
-									  	value="#propDefs[prop].getValue()#"/>
-							</cfinvoke>
-						<cfelseif propType eq "map" or propType eq "list">
-							<cfinvoke component="#beanInstance#"
-									  method="set#propDefs[prop].getName()#">
-								<cfinvokeargument name="#propDefs[prop].getArgumentName()#"
-									  	value="#constructComplexProperty(propDefs[prop].getValue(), propDefs[prop].getType(), localBeanCache)#"/>
-							</cfinvoke>
-						<cfelseif propType eq "ref" or propType eq "bean">
-							<cfset dependentBeanDef = getMergedBeanDefinition(propDefs[prop].getValue()) />
-							<cfif dependentBeanDef.isSingleton()>
-								<cfset dependentBeanInstance = dependentBeanDef.getInstance() />
-							<cfelse>
-								<cfif dependentBeanDef.isFactory()>
-									<cfset dependentBeanInstance = localBeanCache[dependentBeanDef.getBeanID()].getObject() />
+						<cftry>
+							<cfset propType = propDefs[prop].getType() />
+							<cfif propType eq "value">
+								<cfinvoke component="#beanInstance#"
+										  method="set#propDefs[prop].getName()#">
+									<cfinvokeargument name="#propDefs[prop].getArgumentName()#"
+											value="#propDefs[prop].getValue()#"/>
+								</cfinvoke>
+							<cfelseif propType eq "map" or propType eq "list">
+								<cfinvoke component="#beanInstance#"
+										  method="set#propDefs[prop].getName()#">
+									<cfinvokeargument name="#propDefs[prop].getArgumentName()#"
+											value="#constructComplexProperty(propDefs[prop].getValue(), propDefs[prop].getType(), localBeanCache)#"/>
+								</cfinvoke>
+							<cfelseif propType eq "ref" or propType eq "bean">
+								<cfset dependentBeanDef = getMergedBeanDefinition(propDefs[prop].getValue()) />
+								<cftry>
+								<cfif dependentBeanDef.isSingleton()>
+									<cfset dependentBeanInstance = dependentBeanDef.getInstance() />
 								<cfelse>
-									<cfset dependentBeanInstance = localBeanCache[dependentBeanDef.getBeanID()] />
+									<cfif dependentBeanDef.isFactory()>
+										<cfset dependentBeanInstance = localBeanCache[dependentBeanDef.getBeanID()].getObject() />
+									<cfelse>
+										<cfset dependentBeanInstance = localBeanCache[dependentBeanDef.getBeanID()] />
+									</cfif>
 								</cfif>
-							</cfif>
 
-							<cfinvoke component="#beanInstance#"
-									  method="set#propDefs[prop].getName()#">
-								<cfinvokeargument name="#propDefs[prop].getArgumentName()#"
-												  value="#dependentBeanInstance#"/>
-							</cfinvoke>
-						</cfif>
+								<cfinvoke component="#beanInstance#"
+										  method="set#propDefs[prop].getName()#">
+									<cfinvokeargument name="#propDefs[prop].getArgumentName()#"
+													  value="#dependentBeanInstance#"/>
+								</cfinvoke>
+							</cfif>
+							<cfcatch>
+								<cfset getMonolithLogger().ThrowError(
+									type="BeanDef.ConstructError",
+									message="The bean #beanDef.getBeanID()# could not be initialized!",
+									extendedInfo=SerializeJSON({cfcatch:cfcatch,references:{
+										propName:propDefs[prop].getName(),
+										propKeyName:prop,
+										propArgName:propDefs[prop].getArgumentName(),
+										propType:propDefs[prop].getType(),
+										dependentBeanDef:dependentBeanDef.getBeanID()
+									}})
+								) />
+							</cfcatch>
+						</cftry>
 					</cfloop>
 
 					<!--- in order to inject the proper advisors into the aop proxy factories, we should do this now,
