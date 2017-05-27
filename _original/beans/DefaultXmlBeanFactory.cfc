@@ -1024,7 +1024,6 @@
 								</cfinvoke>
 							<cfelseif propType eq "ref" or propType eq "bean">
 								<cfset dependentBeanDef = getMergedBeanDefinition(propDefs[prop].getValue()) />
-								<cftry>
 								<cfif dependentBeanDef.isSingleton()>
 									<cfset dependentBeanInstance = dependentBeanDef.getInstance() />
 								<cfelse>

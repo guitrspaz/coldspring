@@ -215,7 +215,7 @@
 
 
 	<cffunction name="parseEntries" access="private" returntype="any" output="false"
-				hint="parses complex properties, limited to <map/> and <list/>. Should return either an array or an struct.">
+				hint="parses complex properties, limited to <map/> and <list/>. Should return either an array or a struct.">
 		<cfargument name="mapEntries" type="any" required="true" hint="xml of child nodes for this complex type" />
 		<cfargument name="returnType" type="string" required="true" hint="type of property (list|map)" />
 		<cfargument name="properties" type="struct" required="false" hint="properties struct, passed in by a postProcessor" />
@@ -281,85 +281,100 @@
 		</cfif>
 		<cflog text="#SerializeJSON({mapEntries:arguments.mapEntries})#" file="api" type="warning" application="yes" />
 		<cfloop from="1" to="#ArrayLen(mapEntries)#" index="ix">
-			<!--- loop over the children --->
-			<cfset entry = arguments.mapEntries[ix]/>
+			<cftry>
+				<!--- loop over the children --->
+				<cfset entry = arguments.mapEntries[ix]/>
 
-			<cfif returnType eq 'map'>
-				<!--- right now we only support the <entry key=""> syntax for map entries.
-					 this choice was made because CF does not support complex types as struct keys.
-					 If it did we would also support <entry><key>*</key><value>*</value></entry> syntax
-					 --->
-				<cfif not structkeyexists(entry.xmlAttributes,'key')>
-					<cfset getMonolithLogger().ThrowError(
-						type="BeanProperty.MalformedMapException",
-						message="Map entries must have an attribute named 'key'",
-						extendedInfo={arguments:arguments,entry:entry},
-						logOnError=false
-					) />
-				</cfif>
-				<cfif arraylen(entry.xmlChildren) neq 1>
-					<cfset getMonolithLogger().ThrowError(
-						type="BeanProperty.MalformedMapException",
-						message="Map entries must have one child",
-						extendedInfo={arguments:arguments,entry:entry},
-						logOnError=false
-					) />
-				</cfif>
-				<cfset entryChild = entry.xmlChildren[1]/>
-				<cfset entryKey = entry.xmlAttributes.key />
-			<cfelseif returnType eq 'list'>
-				<cfset arrayAppend(rtn,"") />
-				<cfset entryChild = entry/>
-				<cfset entryKey = arrayLen(rtn) />
-			</cfif>
-
-			<!--- ok so the above code created a place to put something (e.g. struct[key] or array[n])
-				  now lets find out what should placed there --->
-
-			<cfswitch expression="#entryChild.xmlName#">
-
-				<cfcase value="value">
-					<!--- easy, just put in your parsed value --->
-					<cfif StructKeyExists(arguments, "properties")>
-						<cfset rtn[entryKey] = parseValue(entryChild.xmlText, arguments.properties) />
-					<cfelse>
-						<cfset rtn[entryKey] = parseValue(entryChild.xmlText) />
+				<cfif returnType eq 'map'>
+					<!--- right now we only support the <entry key=""> syntax for map entries.
+						 this choice was made because CF does not support complex types as struct keys.
+						 If it did we would also support <entry><key>*</key><value>*</value></entry> syntax
+						 --->
+					<cfif not structkeyexists(entry.xmlAttributes,'key')>
+						<cfset getMonolithLogger().ThrowError(
+							type="BeanProperty.MalformedMapException",
+							message="Map entries must have an attribute named 'key'",
+							extendedInfo={arguments:arguments,entry:entry},
+							logOnError=false
+						) />
 					</cfif>
-				</cfcase>
-
-				<!--- for <ref/> and <bean/> elements within complex properties, we need make a 'placeholder'
-				 		so that the beanFactory can replace this element with an actual bean instance when it
-				 		actually contructs the bean who this property belongs to
-				 		coldspring.beans.BeanReference is used for this purpose... it's just a glorified beanID
-				 	 --->
-
-				<cfcase value="ref">
-					<!--- just put in a beanReference with the id of the bean --->
-					<cfset entryBeanID = entryChild.xmlAttributes.bean />
-					<cfset rtn[entryKey] = createObject("component", "coldspring.beans.BeanReference").init(
-																									entryBeanID
-																										)/>
-					<cfset addParentDefinitionDependency(entryBeanID) />
-				</cfcase>
-
-				<cfcase value="bean">
-					<!--- createInnerBeanDefinition now takes care of all the xml parsing and returns new beanUId --->
-					<cfset entryBeanID = createInnerBeanDefinition(entryChild) />
-					<cfset rtn[entryKey] = createObject("component","coldspring.beans.BeanReference").init(
-																									entryBeanID
-																										)/>
-					<cfset addParentDefinitionDependency(entryBeanID) />
-				</cfcase>
-
-				<cfcase value="map,list">
-					<!--- recurse if we find another complex property --->
-					<cfif StructKeyExists(arguments, "properties")>
-						<<cfset rtn[entryKey] = parseEntries(entryChild.xmlChildren,entryChild.xmlName, arguments.properties) />
-					<cfelse>
-						<cfset rtn[entryKey] = parseEntries(entryChild.xmlChildren,entryChild.xmlName) />
+					<cfif arraylen(entry.xmlChildren) neq 1>
+						<cfset getMonolithLogger().ThrowError(
+							type="BeanProperty.MalformedMapException",
+							message="Map entries must have one child",
+							extendedInfo={arguments:arguments,entry:entry},
+							logOnError=false
+						) />
 					</cfif>
-				</cfcase>
-			</cfswitch>
+					<cfset entryChild = entry.xmlChildren[1]/>
+					<cfset entryKey = entry.xmlAttributes.key />
+				<cfelseif returnType eq 'list'>
+					<cfset arrayAppend(rtn,"") />
+					<cfset entryChild = entry/>
+					<cfset entryKey = arrayLen(rtn) />
+				</cfif>
+
+				<!--- ok so the above code created a place to put something (e.g. struct[key] or array[n])
+					  now lets find out what should placed there --->
+
+				<cfswitch expression="#entryChild.xmlName#">
+
+					<cfcase value="value">
+						<!--- easy, just put in your parsed value --->
+						<cfif StructKeyExists(arguments, "properties")>
+							<cfset rtn[entryKey] = parseValue(entryChild.xmlText, arguments.properties) />
+						<cfelse>
+							<cfset rtn[entryKey] = parseValue(entryChild.xmlText) />
+						</cfif>
+					</cfcase>
+
+					<!--- for <ref/> and <bean/> elements within complex properties, we need make a 'placeholder'
+							so that the beanFactory can replace this element with an actual bean instance when it
+							actually contructs the bean who this property belongs to
+							coldspring.beans.BeanReference is used for this purpose... it's just a glorified beanID
+						 --->
+
+					<cfcase value="ref">
+						<!--- just put in a beanReference with the id of the bean --->
+						<cfset entryBeanID = entryChild.xmlAttributes.bean />
+						<cfset rtn[entryKey] = createObject("component", "coldspring.beans.BeanReference").init(
+																										entryBeanID
+																											)/>
+						<cfset addParentDefinitionDependency(entryBeanID) />
+					</cfcase>
+
+					<cfcase value="bean">
+						<!--- createInnerBeanDefinition now takes care of all the xml parsing and returns new beanUId --->
+						<cfset entryBeanID = createInnerBeanDefinition(entryChild) />
+						<cfset rtn[entryKey] = createObject("component","coldspring.beans.BeanReference").init(
+																										entryBeanID
+																											)/>
+						<cfset addParentDefinitionDependency(entryBeanID) />
+					</cfcase>
+
+					<cfcase value="map,list">
+						<!--- recurse if we find another complex property --->
+						<cfif StructKeyExists(arguments, "properties")>
+							<<cfset rtn[entryKey] = parseEntries(entryChild.xmlChildren,entryChild.xmlName, arguments.properties) />
+						<cfelse>
+							<cfset rtn[entryKey] = parseEntries(entryChild.xmlChildren,entryChild.xmlName) />
+						</cfif>
+					</cfcase>
+				</cfswitch>
+				<cfcatch>
+					<cfscript>
+						var metaData=(isObject(rtn[entryKey])?GetMetaData(rtn[entryKey]).filter(function(key,value){
+							return isSimpleValue(value);
+						}):rtn[entryKey];
+						var rtnKeys=(isValid('struct',rtn))?StructKeyArray(rtn):(isValid('array',rtn))?arguments.properties:[];
+					</cfscript>
+					<cfset getMonolithLogger().ThrowError(
+						type="BeanProperty.ParseComplexObjectsError",
+						message="The property #entryKey# is not of type #UCase(returnType)#",
+						extendedInfo={arguments:arguments,cfcatch:cfcatch,returnType:returnType,metaData:metaData,rtnKeys:rtnKeys}
+					) />
+				</cfcatch>
+			</cftry>
 		</cfloop>
 		<cfreturn rtn />
 
