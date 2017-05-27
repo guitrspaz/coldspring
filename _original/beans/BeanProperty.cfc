@@ -371,7 +371,9 @@
 					<cfset getMonolithLogger().ThrowError(
 						type="BeanProperty.ParseComplexObjectsError",
 						message="The property #entryKey# is not of type #UCase(returnType)#",
-						extendedInfo={arguments:arguments,cfcatch:cfcatch,returnType:returnType,metaData:metaData,rtnKeys:rtnKeys}
+						extendedInfo={arguments:arguments,cfcatch:cfcatch,returnType:returnType,metaData:metaData,rtnKeys:rtnKeys},
+						throwOnError=true,
+						logOnError=true
 					) />
 				</cfcatch>
 			</cftry>
