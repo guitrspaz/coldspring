@@ -363,7 +363,7 @@
 				</cfswitch>
 				<cfcatch>
 					<cfscript>
-						var metaData=(isObject(rtn[entryKey])?GetMetaData(rtn[entryKey]).filter(function(key,value){
+						var metaData=(isObject(rtn[entryKey]))?GetMetaData(rtn[entryKey]).filter(function(key,value){
 							return isSimpleValue(value);
 						}):rtn[entryKey];
 						var rtnKeys=(isValid('struct',rtn))?StructKeyArray(rtn):(isValid('array',rtn))?arguments.properties:[];
